@@ -1,0 +1,20 @@
+[
+    {
+      "id": 1,
+      "question": "Quel est le plus grand océan du monde ?",
+      "choices": ["Atlantique", "Pacifique", "Indien", "Arctique"],
+      "answer": "Pacifique"
+    },
+    {
+      "id": 2,
+      "question": "Qui a peint la Joconde ?",
+      "choices": ["Van Gogh", "Picasso", "Da Vinci", "Rembrandt"],
+      "answer": "Da Vinci"
+    },
+    {
+      "id": 3,
+      "question": "Qui a peint la Joconde ?",
+      "choices": ["Van Gogh", "Picasso", "Da Vinci", "Rembrandt"],
+      "answer": "Da Vinci"
+    }
+  ]
