@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { inter } from "@/app/ui/font";
-
+import { WebSocketProvider } from "@/app/context/WebSocketContext";
 
 
 export const metadata: Metadata = {
@@ -19,7 +19,9 @@ export default function RootLayout({
       <body
         className={`${inter.className} antialiased`}
       >
-        {children}
+        <WebSocketProvider>
+          {children}
+        </WebSocketProvider>
       </body>
     </html>
   );

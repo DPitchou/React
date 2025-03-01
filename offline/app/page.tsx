@@ -4,16 +4,17 @@ import { QRCodeSVG } from "qrcode.react";
 import Link from 'next/link';
 import { jaro } from '@/app/ui/font';
 import { useState, useEffect, Suspense } from 'react';
-import io from "socket.io-client";
 import { getQuestions } from "@/app/lib/actions";
+import { useWebSocket } from "@/app/context/WebSocketContext";
 
 export default function Home() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [players, setPlayers] = useState<{ pseudo: string; points: number }[]>([]);
-  const [pseudo, setPseudo] = useState('');
-  const [socket, setSocket] = useState<any>(null);
+  const provider = useWebSocket();
+  const ws = provider?.ws;
+  const players = provider?.players;
+
 
   useEffect(() => {
     // Récupération des questions
@@ -27,21 +28,9 @@ export default function Home() {
         setLoading(false);
       }
     };
-
     fetchQuestions();
-
-    
   }, []);
 
-  useEffect(() => {
-    const newSocket = io('http://localhost:3001', { path: '/api/socket' });
-    setSocket(newSocket);
-
-    newSocket.on('playersUpdate', (updatedPlayers) => {
-      setPlayers(updatedPlayers);
-    });
-
-  }, []);
 
   return (
     <div className="h-screen flex flex-col">
@@ -52,7 +41,7 @@ export default function Home() {
 
         <div className="flex flex-col items-center justify-center">
           <p className="text-5xl text-white text-center py-8">
-            {players.length}<br />Joueurs prêts
+            {players ? Object.keys(players).length : 0}<br />Joueurs prêts
           </p>
           <Link className="flex justify-center items-center w-[250px] bg-[#E4B60E] text-white py-4 rounded-3xl text-lg hover:bg-yellow-400 transition duration-300 antialiased"
             href="/1">
@@ -69,14 +58,20 @@ export default function Home() {
             Modifier les questions
           </Link>
         </div>
-
         <div className="flex items-center justify-center px-4 py-4 bg-white rounded-3xl">
-          <QRCodeSVG value="http://192.168.1.254:3000" />
+          <QRCodeSVG value={`http://${process.env.NEXT_PUBLIC_IP}:${process.env.NEXT_PUBLIC_WEB_PORT}/join`} />
         </div>
       </div>
 
-      <div className="bg-[#B097FB] w-screen h-screen flex flex-col items-center justify-center">
-      </div>
+      <div className="bg-[#B097FB] w-screen h-screen flex flex-col items-start justify-start p-4">
+         <div className="grid grid-cols-3 gap-4">
+          {players ? Object.entries(players).map(([key, player]) => (
+        <div key={key} className="bg-white p-4 rounded-lg shadow-md">
+          <p className="text-xl text-center">{player.pseudo}</p>
+        </div>
+          )) : null}
+        </div>
+      </div> 
     </div>
   );
 }
