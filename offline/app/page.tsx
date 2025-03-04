@@ -67,7 +67,7 @@ export default function Home() {
          <div className="grid grid-cols-3 gap-4">
           {players ? Object.entries(players).map(([key, player]) => (
         <div key={key} className="bg-white p-4 rounded-lg shadow-md">
-          <p className="text-xl text-center">{player.pseudo}</p>
+          <p className="text-xl text-center text-black ">{player.pseudo}</p>
         </div>
           )) : null}
         </div>
