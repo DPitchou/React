@@ -13,8 +13,8 @@
     },
     {
       "id": 3,
-      "question": "Qui a peint la Joconde ?",
-      "choices": ["Van Gogh", "Picasso", "Da Vinci", "Rembrandt"],
-      "answer": "Da Vinci"
+      "question": "Quelle est la capitale de la France ?",
+      "choices": ["Berlin", "Madrid", "Paris", "Rome"],
+      "answer": "Paris"
     }
   ]

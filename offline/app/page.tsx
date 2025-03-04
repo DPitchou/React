@@ -44,7 +44,7 @@ export default function Home() {
             {players ? Object.keys(players).length : 0}<br />Joueurs prêts
           </p>
           <Link className="flex justify-center items-center w-[250px] bg-[#E4B60E] text-white py-4 rounded-3xl text-lg hover:bg-yellow-400 transition duration-300 antialiased"
-            href="/1">
+            href="/game" onClick={() => ws?.send(JSON.stringify({ action: "startGame" }))}>
             Lancer la partie
           </Link>
         </div>

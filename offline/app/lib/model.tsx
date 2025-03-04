@@ -1,32 +1,39 @@
-
-export class Question{
+export type Question = {
     question: string;
     choices: string[];
     answer: string;
+  }
 
-    constructor(question: string, choices: string[], answer: string){
-        this.question = question;
-        this.choices = choices;
-        this.answer = answer;
-    }
 
-    toString():string {
-        return this.question + "\n" + this.choices + "\n" + this.answer;
-    }
+// export class Question{
+//     question: string;
+//     choices: string[];
+//     answer: string;
 
-    static fromJson(json: { id: number; question: string; choices: string[]; answer: string }): Question {
-        return new Question(json.question, json.choices, json.answer);
-    }
+//     constructor(question: string, choices: string[], answer: string){
+//         this.question = question;
+//         this.choices = choices;
+//         this.answer = answer;
+//     }
 
-    toJson():{question: string; choices: string[]; answer: string }{
-        return {question: this.question, choices: this.choices, answer: this.answer };
-    }
+//     toString():string {
+//         return this.question + "\n" + this.choices + "\n" + this.answer;
+//     }
+
+//     static fromJson(json: { id: number; question: string; choices: string[]; answer: string }): Question {
+//         return new Question(json.question, json.choices, json.answer);
+//     }
+
+//     toJson():{question: string; choices: string[]; answer: string }{
+//         return {question: this.question, choices: this.choices, answer: this.answer };
+//     }
 
     
 
-}
+// }
 
 export type Player = {
+    id?: number;
     pseudo: string;
     score: number;
   }

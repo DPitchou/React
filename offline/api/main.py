@@ -10,8 +10,11 @@ import os
 
 players = {}  # Stocke { "id": Player }
 questions = get_questions()
-question = questions[0]
+question_id = 0
+question = questions[question_id]
 clients = set()  # Stocke toutes les connexions WebSocket
+game_status : str = "stdby"  # Peut être "stdby" ou "on"
+
 
 load_dotenv("../.env")
 
@@ -27,21 +30,40 @@ async def broadcast_players():
         message = json.dumps(data)
         await asyncio.gather(*(client.send(message) for client in clients))
 
-async def broadcast_question():
 
+async def broadcast_start():
     if clients:
         data = {
-            "action": "question",
-            "question": question,
+            "action": "startGame"
         }
         message = json.dumps(data)
         await asyncio.gather(*(client.send(message) for client in clients))
 
+async def broadcast_question():
+    if clients:
+        data = {
+            "action": "next_question",
+            "question": question.to_json()
+        }
+        print(f"📤 Envoi de la question: {question.to_json()}")
+        message = json.dumps(data)
+        await asyncio.gather(*(client.send(message) for client in clients))
+
+async def broadcast_answer(exclude_client=None):
+    if clients:
+        data = {
+            "action": "answer",
+        }
+        message = json.dumps(data)
+        await asyncio.gather(*(client.send(message) for client in clients if client != exclude_client))
+
+
 async def game_engine(websocket):
     """Gère la connexion WebSocket d'un client."""
-    global clients
+    global clients, game_status, question_id, question
     clients.add(websocket)
     player_id = None
+
 
     try:
         async for message in websocket:
@@ -56,11 +78,19 @@ async def game_engine(websocket):
                 player_id = len(players) + 1
                 player = Player.from_json(data["player"])
                 players[player_id] = player
-                await websocket.send(json.dumps({"id":player_id, "player": player.to_json()}))
+                await websocket.send(json.dumps({"action" : "joined", "id":player_id, "player": player.to_json()}))
                 await broadcast_players()  # Met à jour tous les clients
             
             elif data["action"] == "getPlayers":
                 await broadcast_players()
+
+            elif data["action"] == "startGame":
+                game_status = "on"
+                await broadcast_start()
+            
+            elif data["action"] == "getStatus":
+                print(f"🕹️ Statut de la partie: {game_status}")
+                await websocket.send(json.dumps({"action": "gameStatus", "status": game_status}))
 
             elif data["action"] == "updateScore":
                 player_id = data["id"]
@@ -69,10 +99,22 @@ async def game_engine(websocket):
                     await websocket.send(json.dumps({"action": "scoreUpdated"}))
                     # print(f"🎯 Score de {player_id} mis à jour: {players[player_id].score}")
                     await broadcast_players()  # Mise à jour des scores pour tous
+            
+            elif data["action"] == "nextQuestion":
+                question_id += 1
+                if question_id >= len(questions):
+                    question = Question("STOP", ["", "", "", ""], "")
+                else:
+                    question = questions[question_id]
+                await broadcast_question()
+            
+            elif data["action"] == "showAnswer":
+                await broadcast_answer(websocket)
+
 
             elif data["action"] == "getQuestion":
                 question_id = data["id"]
-                question = questions.get(question_id)
+                question = questions[question_id]
                 if question:
                     await websocket.send(json.dumps({"action": "question", "question": question.to_json()}))
                 else:
@@ -86,7 +128,8 @@ async def game_engine(websocket):
     finally:
         clients.discard(websocket)
         if player_id and player_id in players:
-            del players[player_id]
+
+            # del players[player_id]
             await broadcast_players()  # Mise à jour quand un joueur part
 
 async def main():
